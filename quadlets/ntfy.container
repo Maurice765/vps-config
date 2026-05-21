@@ -1,0 +1,37 @@
+[Unit]
+Description=Notification Service
+After=caddy.network
+AssertPathIsDirectory=%h/services/ntfy
+AssertPathExists=%h/services/ntfy/server.yml
+
+[Service]
+MemoryMax=256M
+CPUQuota=50%
+
+[Container]
+ContainerName=ntfy
+Image=docker.io/binwiederhier/ntfy:v2.22
+Exec=serve
+RunInit=true
+
+# Network
+Network=caddy.network
+
+# Volumes
+Volume=%h/services/ntfy:/etc/ntfy:ro,Z
+Volume=ntfy-cache.volume:/var/cache/ntfy
+
+# Environment
+Environment="TZ=Europe/Berlin"
+EnvironmentFile=%h/services/ntfy/.env
+
+# Healthcheck
+HealthCmd=CMD-SHELL wget -q --tries=1 http://127.0.0.1:2586/v1/health -O - | grep -E '"healthy".*true' || exit 1
+HealthTimeout=10s
+HealthRetries=3
+HealthStartPeriod=40s
+
+# Security
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all

@@ -1,0 +1,18 @@
+# Server
+listen-http: ":2586"
+behind-proxy: true
+
+# Access control
+auth-file: "/var/cache/ntfy/auth.db"
+auth-default-access: "deny-all"
+enable-login: true
+require-login: true
+auth-access:
+  - "*:up*:write-only"
+
+# Message cache
+cache-file: "/var/cache/ntfy/cache.db"
+cache-duration: "14h"
+
+# Upstream
+upstream-base-url: "https://ntfy.sh"
