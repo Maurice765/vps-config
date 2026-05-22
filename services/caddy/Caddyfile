@@ -48,6 +48,20 @@ http:// {
 	reverse_proxy mollysocket:8020
 	log
 }
+{$MATRIX_BASE_DOMAIN} {
+        import common
+        
+        header /.well-known/matrix/* Content-Type application/json
+        header /.well-known/matrix/* Access-Control-Allow-Origin *
+        respond /.well-known/matrix/server `{"m.server": "{$MATRIX_SUB_DOMAIN}:443"}`
+        respond /.well-known/matrix/client `{"m.homeserver":{"base_url":"https://{$MATRIX_SUB_DOMAIN}"}}`
+}
+{$MATRIX_SUB_DOMAIN} {
+        import common
+
+        reverse_proxy /_matrix/* synapse:8008
+        reverse_proxy /_synapse/client/* synapse:8008
+}
 (landzunge_app) {
         # Match requests that DO NOT have your secret password
         @not_cloudflare {

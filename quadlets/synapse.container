@@ -1,0 +1,32 @@
+[Unit]
+Description=Matrix Synapse Homeserver (Pod)
+After=synapse-db.service
+Requires=synapse-db.service
+
+[Service]
+MemoryMax=4G
+CPUQuota=200%
+
+[Container]
+ContainerName=synapse
+Pod=synapse.pod
+Image=docker.io/matrixdotorg/synapse:latest
+AutoUpdate=registry
+
+# Volumes
+Volume=synapse-data.volume:/data
+
+# Environment
+Environment="TZ=Europe/Berlin"
+
+# Healthcheck
+HealthCmd=CMD curl -fSs http://localhost:8008/health
+HealthInterval=15s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=90s
+
+# Security
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all

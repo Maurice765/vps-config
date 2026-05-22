@@ -7,8 +7,8 @@ AssertPathExists=%h/services/caddy/Caddyfile
 
 [Service]
 ExecReload=podman exec caddy /usr/bin/caddy reload --config /etc/caddy/Caddyfile --address unix//run/admin.sock --force
-MemoryMax=256M
-CPUQuota=50%
+MemoryMax=512M
+CPUQuota=100%
 
 [Container]
 ContainerName=caddy
@@ -21,6 +21,7 @@ Network=ntfy.network
 Network=kitchenowl.network
 Network=mollysocket.network
 Network=landzunge.network
+Network=synapse.network
 
 # Volumes
 Volume=%h/services/caddy:/etc/caddy:ro,Z

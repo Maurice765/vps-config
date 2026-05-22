@@ -1,0 +1,4 @@
+[Pod]
+PodName=synapse
+Network=synapse.network
+UserNS=keep-id

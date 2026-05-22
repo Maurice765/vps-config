@@ -1,0 +1,31 @@
+[Unit]
+Description=Synapse Postgres Database
+AssertPathIsDirectory=%h/services/synapse
+AssertPathExists=%h/services/synapse/.env
+
+[Service]
+MemoryMax=512M
+CPUQuota=50%
+
+[Container]
+ContainerName=synapse_db
+Pod=synapse.pod
+Image=docker.io/library/postgres:15-alpine
+Exec=-c listen_addresses='127.0.0.1'
+
+# Volumes
+Volume=synapse-postgres.volume:/var/lib/postgresql/data
+
+# Environment
+EnvironmentFile=%h/services/synapse/.env
+
+# Healthcheck
+HealthCmd=CMD-SHELL pg_isready -U synapse_user -d synapse
+HealthInterval=10s
+HealthTimeout=5s
+HealthRetries=5
+
+# Security
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all
