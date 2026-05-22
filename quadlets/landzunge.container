@@ -1,0 +1,23 @@
+[Unit]
+Description=Landzunge Backend Service
+AssertPathIsDirectory=%h/services/landzunge
+AssertPathExists=%h/services/landzunge/.env
+
+[Service]
+MemoryMax=256M
+CPUQuota=50%
+
+[Container]
+ContainerName=landzunge-backend
+Image=ghcr.io/finnhoedt/landzunge-backend:latest
+
+# Network
+Network=landzunge.network
+
+# Environment
+EnvironmentFile=%h/services/landzunge/.env
+
+# Security
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all

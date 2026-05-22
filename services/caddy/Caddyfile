@@ -48,3 +48,47 @@ http:// {
 	reverse_proxy mollysocket:8020
 	log
 }
+(landzunge_app) {
+        # Match requests that DO NOT have your secret password
+        @not_cloudflare {
+			not header X-Proxy-Secret {$CLOUDFLARE_SECRET}
+        }
+
+        # Strip the IP header if the password was missing/wrong
+        request_header @not_cloudflare -CF-Connecting-IP
+
+        # Remove the secret before sending to the backend
+        request_header -X-Proxy-Secret
+
+        reverse_proxy landzunge-backend:3000 {
+			header_up X-Real-IP {remote_host}
+        }
+}
+{$LANDZUNGE_API_DOMAIN} {
+        import common
+
+        request_body {
+			max_size 10MB
+        }
+
+        @api path /api/*
+        handle @api {
+			import landzunge_app
+        }
+
+        handle {
+			respond "Not Found" 404
+        }
+}
+{$LANDZUNGE_ADMIN_DOMAIN} {
+        import common
+
+        @api path /api/*
+        handle @api {
+			respond "Not Found" 404
+        }
+
+        handle {
+			import landzunge_app
+        }
+}
