@@ -38,8 +38,13 @@ http:// {
 	log
 }
 {$KITCHENOWL_DOMAIN} {
-        import common
-        header X-Frame-Options "SAMEORIGIN"
-        reverse_proxy kitchenowl:8080
-		log
+	import common
+	header X-Frame-Options "SAMEORIGIN"
+	reverse_proxy kitchenowl:8080
+	log
+}
+{$MOLLYSOCKET_DOMAIN} {
+	import common
+	reverse_proxy mollysocket:8020
+	log
 }

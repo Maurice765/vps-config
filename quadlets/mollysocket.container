@@ -1,0 +1,28 @@
+[Unit]
+Description=UnifiedPush Support for Molly
+AssertPathIsDirectory=%h/services/mollysocket
+AssertPathExists=%h/services/mollysocket/.env
+
+[Service]
+MemoryMax=256M
+CPUQuota=50%
+
+[Container]
+ContainerName=mollysocket
+Image=ghcr.io/mollyim/mollysocket:1.7.1
+Exec=server
+WorkingDir=/data
+
+# Network
+Network=mollysocket.network
+
+# Volumes
+Volume=mollysocket-data.volume:/data
+
+# Environment
+EnvironmentFile=%h/services/mollysocket/.env
+
+# Security
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all

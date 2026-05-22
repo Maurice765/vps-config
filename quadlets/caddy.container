@@ -18,6 +18,8 @@ Notify=true
 
 # Network
 Network=ntfy.network
+Network=kitchenowl.network
+Network=mollysocket.network
 
 # Volumes
 Volume=%h/services/caddy:/etc/caddy:ro,Z
