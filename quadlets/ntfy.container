@@ -1,6 +1,5 @@
 [Unit]
 Description=Notification Service
-After=caddy.network
 AssertPathIsDirectory=%h/services/ntfy
 AssertPathExists=%h/services/ntfy/server.yml
 
@@ -15,7 +14,7 @@ Exec=serve
 RunInit=true
 
 # Network
-Network=caddy.network
+Network=ntfy.network
 
 # Volumes
 Volume=%h/services/ntfy:/etc/ntfy:ro,Z

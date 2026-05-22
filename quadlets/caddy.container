@@ -17,10 +17,10 @@ Exec=/usr/bin/caddy run --config /etc/caddy/Caddyfile
 Notify=true
 
 # Network
-Network=caddy.network
+Network=ntfy.network
 
 # Volumes
-Volume=%h/services/caddy:/etc/caddy:Z
+Volume=%h/services/caddy:/etc/caddy:ro,Z
 Volume=caddy-config.volume:/config
 Volume=caddy-data.volume:/data
 
