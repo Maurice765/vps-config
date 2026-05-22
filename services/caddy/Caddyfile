@@ -16,6 +16,8 @@
 		X-Frame-Options "DENY"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'self';"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), autoplay=(), fullscreen=(self)"
 	}
 }
 (common) {
@@ -27,12 +29,6 @@ http:// {
 		protocols h1
 	}
 	redir https://{host}{uri}
-	log
-}
-
-{$WHOAMI_DOMAIN} {
-	import common
-	reverse_proxy whoami:8080
 	log
 }
 
