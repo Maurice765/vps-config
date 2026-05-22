@@ -1,0 +1,26 @@
+[Unit]
+Description=Grocery List and Recipe Manager
+AssertPathIsDirectory=%h/services/kitchenowl
+AssertPathExists=%h/services/kitchenowl/.env
+
+[Service]
+MemoryMax=1G
+CPUQuota=100%
+
+[Container]
+ContainerName=kitchenowl
+Image=docker.io/tombursch/kitchenowl:v0.7.8
+
+# Network
+Network=kitchenowl.network
+
+# Volumes
+Volume=kitchenowl-data.volume:/data
+
+# Environment
+EnvironmentFile=%h/services/kitchenowl/.env
+
+# Security
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all

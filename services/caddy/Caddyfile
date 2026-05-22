@@ -37,3 +37,9 @@ http:// {
 	reverse_proxy ntfy:2586
 	log
 }
+{$KITCHENOWL_DOMAIN} {
+        import common
+        header X-Frame-Options "SAMEORIGIN"
+        reverse_proxy kitchenowl:8080
+		log
+}
