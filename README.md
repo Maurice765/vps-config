@@ -24,9 +24,10 @@ name to the `services` list in `deploy.yml` — no role changes.
 ```
 .
 ├── bootstrap.yml              # one-time root setup
-├── deploy.yml                   # deploy all services
+├── deploy.yml                 # deploy all services
 ├── ansible.cfg
-├── inventory.ini
+├── inventory.ini              # real VPS address (gitignored)
+├── inventory.ini.example      # placeholder template
 ├── requirements.yml
 ├── group_vars/all/
 │   ├── vars.yml               # real config (gitignored)
@@ -51,6 +52,7 @@ name to the `services` list in `deploy.yml` — no role changes.
 2. Create your variable files from the examples:
 
    ```sh
+   cp inventory.ini.example            inventory.ini
    cp group_vars/all/vars.yml.example  group_vars/all/vars.yml
    cp group_vars/all/vault.yml.example group_vars/all/vault.yml
    ```
@@ -85,7 +87,7 @@ ansible-playbook deploy.yml --tags caddy
 
 ## Notes
 
-- `vars.yml` and `vault.yml` are gitignored; only the `.example` files are
+- `inventory.ini`, `vars.yml` and `vault.yml` are gitignored; only the `.example` files are
   committed. The vault file is encrypted — keep a backup, since it is not in
   the repo.
 - Quadlet files (`.container`, `.volume`, `.network`) are static. Environment
