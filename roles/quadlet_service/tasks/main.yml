@@ -8,6 +8,7 @@
   become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"
   block:
     # -------------------------------------------------------------------------
     # 1. Load the service manifest (file lists, secrets, values)

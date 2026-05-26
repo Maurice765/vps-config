@@ -34,6 +34,13 @@
       changed_when: true
       when: linger_status.stdout | trim != 'yes'
 
+    - name: Ensure the apprunner systemd user manager is running
+      ansible.builtin.systemd:
+        name: "user@{{ apprunner_user.uid }}.service"
+        state: started
+        enabled: true
+      become: true
+
     # -------------------------------------------------------------------------
     # 3. Allow rootless containers to bind privileged ports
     # -------------------------------------------------------------------------
