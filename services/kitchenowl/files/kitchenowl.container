@@ -27,3 +27,6 @@ EnvironmentFile=%h/services/kitchenowl/.env
 ReadOnly=true
 NoNewPrivileges=true
 DropCapability=all
+
+[Install]
+WantedBy=default.target

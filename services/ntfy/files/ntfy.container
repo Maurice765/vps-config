@@ -30,3 +30,6 @@ HealthStartPeriod=40s
 ReadOnly=true
 NoNewPrivileges=true
 DropCapability=all
+
+[Install]
+WantedBy=default.target

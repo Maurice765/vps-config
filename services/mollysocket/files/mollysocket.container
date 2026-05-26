@@ -29,3 +29,6 @@ EnvironmentFile=%h/services/mollysocket/.env
 ReadOnly=true
 NoNewPrivileges=true
 DropCapability=all
+
+[Install]
+WantedBy=default.target
