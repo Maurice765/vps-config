@@ -23,13 +23,6 @@
     # -------------------------------------------------------------------------
     # 2. Deploy each service
     # -------------------------------------------------------------------------
-    - name: Deploy caddy
-      ansible.builtin.include_role:
-        name: quadlet_service
-      vars:
-        quadlet_service_name: caddy
-      tags: caddy
-
     - name: Deploy ntfy
       ansible.builtin.include_role:
         name: quadlet_service
@@ -57,3 +50,10 @@
       vars:
         quadlet_service_name: landzunge
       tags: landzunge
+
+    - name: Deploy caddy
+      ansible.builtin.include_role:
+        name: quadlet_service
+      vars:
+        quadlet_service_name: caddy
+      tags: caddy
