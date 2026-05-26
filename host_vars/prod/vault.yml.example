@@ -1,5 +1,5 @@
 ---
-vault_cloudflare_secret: "cloudflare-secret"
-vault_kitchenowl_jwt_secret: "jwt-secret"
-vault_mollysocket_vapid_privkey: "vapid-key"
-vault_landzunge_supabase_service_key: "supabase-key"
+vault_kitchenowl_jwt_secret: 'jwt-secret'
+vault_mollysocket_vapid_privkey: 'vapid-key'
+vault_landzunge_cloudflare_secret: 'cloudflare-secret'
+vault_landzunge_supabase_service_key: 'supabase-key'
