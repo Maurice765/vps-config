@@ -1,5 +1,0 @@
-[vps]
-my-vps ansible_host=192.0.000.00
-
-[vps:vars]
-ansible_user=ssh-user
