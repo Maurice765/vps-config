@@ -7,15 +7,6 @@
   hosts: quadlet_hosts
   gather_facts: true
 
-  vars:
-    # Deploy order
-    services:
-      - caddy
-      - ntfy
-      - kitchenowl
-      - mollysocket
-      - landzunge
-
   tasks:
     # -------------------------------------------------------------------------
     # 1. Resolve the apprunner UID for the systemd user session
@@ -30,14 +21,39 @@
         apprunner_xdg: "/run/user/{{ getent_passwd[podman_user][1] }}"
 
     # -------------------------------------------------------------------------
-    # 2. Deploy each service via the generic quadlet_service role
+    # 2. Deploy each service
     # -------------------------------------------------------------------------
-    - name: Deploy each service
+    - name: Deploy caddy
       ansible.builtin.include_role:
         name: quadlet_service
-        apply:
-          tags: "{{ item }}"
       vars:
-        quadlet_service_name: "{{ item }}"
-      loop: "{{ services }}"
-      tags: "{{ item }}"
+        quadlet_service_name: caddy
+      tags: caddy
+
+    - name: Deploy ntfy
+      ansible.builtin.include_role:
+        name: quadlet_service
+      vars:
+        quadlet_service_name: ntfy
+      tags: ntfy
+
+    - name: Deploy kitchenowl
+      ansible.builtin.include_role:
+        name: quadlet_service
+      vars:
+        quadlet_service_name: kitchenowl
+      tags: kitchenowl
+
+    - name: Deploy mollysocket
+      ansible.builtin.include_role:
+        name: quadlet_service
+      vars:
+        quadlet_service_name: mollysocket
+      tags: mollysocket
+
+    - name: Deploy landzunge
+      ansible.builtin.include_role:
+        name: quadlet_service
+      vars:
+        quadlet_service_name: landzunge
+      tags: landzunge
