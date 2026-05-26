@@ -1,0 +1,11 @@
+---
+
+# Caddy
+caddy_email: admin@example.com
+
+# Mollysocket
+mollysocket_allowed_uuids:
+  - "uuid"
+
+# Landzunge
+landzunge_supabase_url: https://supabase.example.com

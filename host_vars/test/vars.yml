@@ -1,0 +1,15 @@
+---
+
+# Domains
+base_domain_services: localhost
+base_domain_landzunge: localhost
+
+# Caddy
+caddy_email: admin@example.com
+
+# Mollysocket
+mollysocket_allowed_uuids:
+  - 'uuid'
+
+# Landzunge
+landzunge_supabase_url: https://amdvotgtgklzcbkhtagr.supabase.co

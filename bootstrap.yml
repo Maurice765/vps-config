@@ -4,7 +4,7 @@
 # One-time, root-level setup for the VPS
 # =============================================================================
 - name: Bootstrap VPS for rootless Podman
-  hosts: vps
+  hosts: quadlet_hosts
   become: true
   gather_facts: true
 
