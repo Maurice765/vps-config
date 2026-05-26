@@ -9,10 +9,13 @@ CPUQuota=50%
 
 [Container]
 ContainerName=landzunge-backend
-Image=ghcr.io/finnhoedt/landzunge-backend:latest
+Image=ghcr.io/finnhoedt/landzunge-backend:1.1
 
 # Network
 Network=landzunge.network
+
+# Secrets
+Secret=landzunge_supabase_service_key,type=env,target=SUPABASE_SERVICE_KEY
 
 # Environment
 EnvironmentFile=%h/services/landzunge/.env

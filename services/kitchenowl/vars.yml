@@ -1,0 +1,17 @@
+---
+# Variables for the kitchenowl service
+
+quadlet_service_quadlet_files:
+  - kitchenowl-data.volume
+  - kitchenowl.container
+  - kitchenowl.network
+
+quadlet_service_template_files:
+  - .env.j2
+
+quadlet_service_start_units:
+  - kitchenowl.service
+
+quadlet_service_secrets:
+  - name: kitchenowl_jwt_secret
+    data: "{{ vault_kitchenowl_jwt_secret }}"

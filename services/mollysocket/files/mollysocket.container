@@ -19,6 +19,9 @@ Network=mollysocket.network
 # Volumes
 Volume=mollysocket-data.volume:/data
 
+# Secrets
+Secret=mollysocket_vapid_privkey,type=env,target=MOLLY_VAPID_PRIVKEY
+
 # Environment
 EnvironmentFile=%h/services/mollysocket/.env
 

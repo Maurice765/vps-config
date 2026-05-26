@@ -1,1 +1,16 @@
-.env
+# Vault password file
+.vault_pass
+ 
+# Real variable
+group_vars/all/vars.yml
+group_vars/all/vault.yml
+.vault_pass
+ 
+# Ansible runtime cruft
+*.retry
+*.log
+ 
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store

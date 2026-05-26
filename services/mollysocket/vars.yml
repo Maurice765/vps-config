@@ -1,0 +1,17 @@
+---
+# Variables for the mollysocket service
+
+quadlet_service_quadlet_files:
+  - mollysocket-data.volume
+  - mollysocket.container
+  - mollysocket.network
+
+quadlet_service_template_files:
+  - .env.j2
+
+quadlet_service_start_units:
+  - mollysocket.service
+
+quadlet_service_secrets:
+  - name: mollysocket_vapid_privkey
+    data: "{{ vault_mollysocket_vapid_privkey }}"

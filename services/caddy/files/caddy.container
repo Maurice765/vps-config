@@ -27,6 +27,9 @@ Volume=%h/services/caddy:/etc/caddy:ro,Z
 Volume=caddy-config.volume:/config
 Volume=caddy-data.volume:/data
 
+# Secrets
+Secret=landzunge_cloudflare_secret,type=env,target=CLOUDFLARE_SECRET
+
 # Environment
 EnvironmentFile=%h/services/caddy/.env
 

@@ -1,0 +1,23 @@
+---
+# =============================================================================
+# roles/quadlet_service/defaults/main.yml
+# Empty defaults for all role variables
+# =============================================================================
+
+# Default values for the quadlet_service role
+quadlet_service_quadlet_files: []
+
+# Native systemd units
+quadlet_service_systemd_units: []
+
+# Static config files
+quadlet_service_config_files: []
+
+# Jinja2 templates rendered from templates
+quadlet_service_template_files: []
+
+# systemd user units to start and enable
+quadlet_service_start_units: []
+
+# Podman secrets the service needs
+quadlet_service_secrets: []

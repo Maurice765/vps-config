@@ -1,0 +1,28 @@
+---
+
+# System
+podman_user: apprunner
+podman_user_home: "/home/{{ podman_user }}"
+
+# Domains
+ntfy_domain: ntfy.example.com
+kitchenowl_domain: kitchenowl.example.com
+mollysocket_domain: mollysocket.example.com
+landzunge_domain: example.com
+landzunge_api_domain: api.example.com
+landzunge_admin_domain: admin.example.com
+
+# Caddy
+caddy_email: admin@example.com
+
+# Mollysocket
+mollysocket_allowed_endpoints:
+  - "https://{{ ntfy_domain }}"
+mollysocket_allowed_uuids:
+  - "uuid"
+
+# Landzunge
+landzunge_supabase_url: https://supabase.example.com
+landzunge_cors_origins:
+  - "https://{{ landzunge_domain }}"
+  - "https://{{ landzunge_admin_domain }}"

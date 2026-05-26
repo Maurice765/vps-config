@@ -1,0 +1,43 @@
+---
+# =============================================================================
+# site.yml
+# Deployment of all rootless Quadlet services.
+# =============================================================================
+- name: Deploy Quadlet services
+  hosts: vps
+  gather_facts: true
+
+  vars:
+    # Deploy order
+    services:
+      - caddy
+      - ntfy
+      - kitchenowl
+      - mollysocket
+      - landzunge
+
+  tasks:
+    # -------------------------------------------------------------------------
+    # 1. Resolve the apprunner UID for the systemd user session
+    # -------------------------------------------------------------------------
+    - name: Look up apprunner UID
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ podman_user }}"
+
+    - name: Set the XDG runtime path
+      ansible.builtin.set_fact:
+        apprunner_xdg: "/run/user/{{ getent_passwd[podman_user][1] }}"
+
+    # -------------------------------------------------------------------------
+    # 2. Deploy each service via the generic quadlet_service role
+    # -------------------------------------------------------------------------
+    - name: Deploy each service
+      ansible.builtin.include_role:
+        name: quadlet_service
+        apply:
+          tags: "{{ item }}"
+      vars:
+        quadlet_service_name: "{{ item }}"
+      loop: "{{ services }}"
+      tags: "{{ item }}"

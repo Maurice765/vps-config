@@ -17,6 +17,9 @@ Network=kitchenowl.network
 # Volumes
 Volume=kitchenowl-data.volume:/data
 
+# Secrets
+Secret=kitchenowl_jwt_secret,type=env,target=JWT_SECRET_KEY
+
 # Environment
 EnvironmentFile=%h/services/kitchenowl/.env
 

@@ -20,10 +20,6 @@ Network=ntfy.network
 Volume=%h/services/ntfy:/etc/ntfy:ro,Z
 Volume=ntfy-cache.volume:/var/cache/ntfy
 
-# Environment
-Environment="TZ=Europe/Berlin"
-EnvironmentFile=%h/services/ntfy/.env
-
 # Healthcheck
 HealthCmd=CMD-SHELL wget -q --tries=1 http://127.0.0.1:2586/v1/health -O - | grep -E '"healthy".*true' || exit 1
 HealthTimeout=10s

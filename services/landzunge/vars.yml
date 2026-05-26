@@ -1,0 +1,16 @@
+---
+# Variables for the landzunge service
+
+quadlet_service_quadlet_files:
+  - landzunge.container
+  - landzunge.network
+
+quadlet_service_template_files:
+  - .env.j2
+
+quadlet_service_start_units:
+  - landzunge.service
+
+quadlet_service_secrets:
+  - name: landzunge_supabase_service_key
+    data: "{{ vault_landzunge_supabase_service_key }}"

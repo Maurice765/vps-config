@@ -1,0 +1,23 @@
+---
+# Variables for the caddy service
+
+quadlet_service_quadlet_files:
+  - caddy-config.volume
+  - caddy-data.volume
+  - caddy.container
+
+quadlet_service_systemd_units:
+  - caddy.socket
+
+quadlet_service_config_files:
+  - Caddyfile
+
+quadlet_service_template_files:
+  - .env.j2
+
+quadlet_service_start_units:
+  - caddy.socket
+
+quadlet_service_secrets:
+  - name: landzunge_cloudflare_secret
+    data: "{{ vault_landzunge_cloudflare_secret }}"
