@@ -18,7 +18,7 @@
 
     - name: Set the XDG runtime path
       ansible.builtin.set_fact:
-        apprunner_xdg: "/run/user/{{ getent_passwd[podman_user][1] }}"
+        apprunner_xdg: "/run/user/{{ ansible_facts['getent_passwd'][podman_user][1] }}"
 
     # -------------------------------------------------------------------------
     # 2. Deploy each service
