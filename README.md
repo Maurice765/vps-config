@@ -8,7 +8,7 @@ user via systemd user units.
 
 - **`bootstrap.yml`** — one-time, root-level setup: creates the `apprunner`
   user, enables lingering, allows privileged ports, creates base directories.
-- **`site.yml`** — day-to-day deployment: loops over every service and applies
+- **`deploy.yml`** — day-to-day deployment: loops over every service and applies
   the generic `quadlet_service` role.
 - **`roles/quadlet_service/`** — the deployment logic, written once. Copies
   Quadlet files, native systemd units and config, renders templates, creates
@@ -17,14 +17,14 @@ user via systemd user units.
   manifest, static input files in `files/`, and Jinja2 templates in `templates/`.
 
 Adding a service means creating one folder under `services/` and adding its
-name to the `services` list in `site.yml` — no role changes.
+name to the `services` list in `deploy.yml` — no role changes.
 
 ## Layout
 
 ```
 .
 ├── bootstrap.yml              # one-time root setup
-├── site.yml                   # deploy all services
+├── deploy.yml                   # deploy all services
 ├── ansible.cfg
 ├── inventory.ini
 ├── requirements.yml
@@ -74,13 +74,13 @@ ansible-playbook bootstrap.yml
 Deploy all services:
 
 ```sh
-ansible-playbook site.yml
+ansible-playbook deploy.yml
 ```
 
 Deploy a single service via its tag:
 
 ```sh
-ansible-playbook site.yml --tags caddy
+ansible-playbook deploy.yml --tags caddy
 ```
 
 ## Notes

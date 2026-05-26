@@ -1,6 +1,6 @@
 ---
 # =============================================================================
-# site.yml
+# deploy.yml
 # Deployment of all rootless Quadlet services.
 # =============================================================================
 - name: Deploy Quadlet services
