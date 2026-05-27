@@ -1,17 +1,24 @@
 ---
 # Stage a single Quadlet service: copy files, notify daemon-reload on unit
 # changes, record per-service change flags for the activate phase.
+# Re-load role defaults each invocation to reset any value left over from
+# a previous service, then layer the service vars on top.
+- name: Reset role defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/defaults/main.yml"
+
+- name: Load service-specific variables
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/vars.yml"
+
 - name: "Stage service: {{ quadlet_service_name }}"
   become: true
   become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
     DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"
+  when: quadlet_service_enabled
   block:
-    - name: Load service-specific variables
-      ansible.builtin.include_vars:
-        file: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/vars.yml"
-
     - name: Create the service runtime directory
       ansible.builtin.file:
         path: "{{ podman_user_home }}/services/{{ quadlet_service_name }}"

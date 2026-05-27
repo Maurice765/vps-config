@@ -1,6 +1,8 @@
 ---
 # Defaults for the quadlet_service role.
 
+quadlet_service_enabled: true
+
 quadlet_service_quadlet_files: []
 quadlet_service_systemd_units: []
 quadlet_service_config_files: []
