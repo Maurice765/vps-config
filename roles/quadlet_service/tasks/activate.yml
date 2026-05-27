@@ -1,0 +1,30 @@
+---
+# Activate a Quadlet service: restart on change, ensure started + enabled.
+# Runs after the daemon-reload handler has fired.
+- name: "Activate service: {{ quadlet_service_name }}"
+  become: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"
+  block:
+    - name: Load service-specific variables
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/vars.yml"
+
+    - name: Restart service units after a change
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+        scope: user
+      loop: "{{ quadlet_service_start_units }}"
+      when: quadlet_service_changes[quadlet_service_name].units
+            or quadlet_service_changes[quadlet_service_name].config
+
+    - name: Ensure service units are started and enabled
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+        scope: user
+      loop: "{{ quadlet_service_start_units }}"

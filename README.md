@@ -9,14 +9,23 @@ codebase.
   user, enables lingering, allows privileged ports, creates base directories.
 - **`deploy.yml`** — day-to-day deployment: loops over every service and applies
   the generic `quadlet_service` role.
-- **`roles/quadlet_service/`** — the deployment logic, written once. Copies
-  Quadlet files, native systemd units and config, renders templates, creates
-  Podman secrets, and restarts only what changed.
+- **`roles/quadlet_infra/`** — shared Quadlet foundation. Stages cross-service
+  resources (shared podman networks) and owns the daemon-reload handler that
+  every notifier fires into. Pre-loaded via `deploy.yml`'s `roles:` keyword
+  so the handler is registered before any task runs.
+- **`roles/quadlet_service/`** — per-service deployment logic, written once.
+  Copies Quadlet files, native systemd units and config, renders templates,
+  creates Podman secrets, and restarts only what changed. Split into a
+  `stage.yml` phase (copy files) and an `activate.yml` phase (restart on
+  change, ensure started) so the host-wide daemon-reload fires exactly once
+  per run.
 - **`services/<name>/`** — one folder per service, pure data: a `vars.yml`
   manifest, static input files in `files/`, and Jinja2 templates in `templates/`.
 
-Adding a service means creating one folder under `services/` and adding its
-name to the `services` list in `deploy.yml` — no role changes.
+Adding a service means creating one folder under `services/` and adding two
+blocks to `deploy.yml` — a `Stage <name>` entry in the stage phase and a
+matching `Activate <name>` entry in the activate phase, both sharing the
+same tag. No role changes needed.
 
 ## Layout
 
@@ -38,11 +47,14 @@ name to the `services` list in `deploy.yml` — no role changes.
 │   └── test/
 │       ├── vars.yml            # test inputs
 │       └── vault.yml           # test secrets, encrypted
-├── roles/quadlet_service/
+├── infra/files/              # shared Quadlet network files
+├── roles/
+│   ├── quadlet_infra/        # shared networks + daemon-reload handler
+│   └── quadlet_service/      # per-service stage/activate logic
 └── services/<name>/
-    ├── vars.yml               # file lists, start units, secrets
-    ├── files/                 # Quadlet files, native units, static config
-    └── templates/             # *.j2 rendered onto the host
+    ├── vars.yml              # file lists, start units, secrets
+    ├── files/                # Quadlet files, native units, static config
+    └── templates/            # *.j2 rendered onto the host
 ```
 
 ## Setup

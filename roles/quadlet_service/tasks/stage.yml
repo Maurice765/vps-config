@@ -1,9 +1,7 @@
 ---
-# =============================================================================
-# roles/quadlet_service/tasks/main.yml
-# Deploy a single rootless Quadlet service for the apprunner user
-# =============================================================================
-- name: "Deploy service: {{ quadlet_service_name }}"
+# Stage a single Quadlet service: copy files, notify daemon-reload on unit
+# changes, record per-service change flags for the activate phase.
+- name: "Stage service: {{ quadlet_service_name }}"
   become: true
   become_user: "{{ podman_user }}"
   environment:
@@ -45,6 +43,7 @@
         mode: '0644'
       loop: "{{ quadlet_service_quadlet_files }}"
       register: quadlet_service_quadlet_result
+      notify: Reload systemd user daemon
 
     # -------------------------------------------------------------------------
     # 4. Copy native systemd units -> ~/.config/systemd/user/
@@ -56,6 +55,7 @@
         mode: '0644'
       loop: "{{ quadlet_service_systemd_units }}"
       register: quadlet_service_systemd_result
+      notify: Reload systemd user daemon
 
     # -------------------------------------------------------------------------
     # 5. Copy static config files -> ~/services/<name>/
@@ -81,47 +81,16 @@
       register: quadlet_service_template_result
 
     # -------------------------------------------------------------------------
-    # 7. Distill the copy/template results into two change flags
+    # 7. Record per-service change flags for the activate phase
     # -------------------------------------------------------------------------
-    - name: Determine whether a unit file changed
+    - name: "Record change flags for {{ quadlet_service_name }}"
       ansible.builtin.set_fact:
-        quadlet_service_units_changed: >-
-          {{ (quadlet_service_quadlet_result.changed | default(false))
-             or (quadlet_service_systemd_result.changed | default(false)) }}
-
-    - name: Determine whether a config or template file changed
-      ansible.builtin.set_fact:
-        quadlet_service_config_changed: >-
-          {{ (quadlet_service_config_result.changed | default(false))
-             or (quadlet_service_template_result.changed | default(false)) }}
-
-    # -------------------------------------------------------------------------
-    # 8. Reload the systemd user daemon (only if a unit file changed)
-    # -------------------------------------------------------------------------
-    - name: Reload the systemd user daemon
-      ansible.builtin.systemd:
-        daemon_reload: true
-        scope: user
-      when: quadlet_service_units_changed
-
-    # -------------------------------------------------------------------------
-    # 9. Restart units (only if a unit, config or template file changed)
-    # -------------------------------------------------------------------------
-    - name: Restart service units after a change
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        state: restarted
-        scope: user
-      loop: "{{ quadlet_service_start_units }}"
-      when: quadlet_service_units_changed or quadlet_service_config_changed
-
-    # -------------------------------------------------------------------------
-    # 10. Always ensure units are started and enabled
-    # -------------------------------------------------------------------------
-    - name: Ensure service units are started and enabled
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        state: started
-        enabled: true
-        scope: user
-      loop: "{{ quadlet_service_start_units }}"
+        quadlet_service_changes: >-
+          {{ quadlet_service_changes | default({}) | combine({
+               quadlet_service_name: {
+                 'units': ((quadlet_service_quadlet_result.changed | default(false))
+                           or (quadlet_service_systemd_result.changed | default(false))),
+                 'config': ((quadlet_service_config_result.changed | default(false))
+                            or (quadlet_service_template_result.changed | default(false)))
+               }
+             }) }}

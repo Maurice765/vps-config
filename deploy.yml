@@ -1,11 +1,16 @@
 ---
-# =============================================================================
-# deploy.yml
-# Deployment of all rootless Quadlet services.
-# =============================================================================
+# Two-phase rollout: stage files (notify daemon-reload on unit changes),
+# flush_handlers for a single reload, then activate (restart-on-change,
+# ensure started + enabled).
 - name: Deploy Quadlet services
   hosts: quadlet_hosts
   gather_facts: true
+
+  # quadlet_infra is pre-loaded here so its Reload-systemd-user-daemon
+  # handler is registered before any stage task runs. The role has no
+  # tasks/main.yml — its actual staging is invoked explicitly below.
+  roles:
+    - quadlet_infra
 
   tasks:
     # -------------------------------------------------------------------------
@@ -19,47 +24,100 @@
     - name: Set the XDG runtime path
       ansible.builtin.set_fact:
         apprunner_xdg: "/run/user/{{ ansible_facts['getent_passwd'][podman_user][1] }}"
-    
-    # -------------------------------------------------------------------------
-    # 2. Deploy shared infrastructure
-    # -------------------------------------------------------------------------
-    - name: Deploy shared infrastructure
-      ansible.builtin.import_tasks: tasks/infra.yml
 
     # -------------------------------------------------------------------------
-    # 3. Deploy each service
+    # 2. Stage phase — copy files for infra and every service
     # -------------------------------------------------------------------------
-    - name: Deploy ntfy
+    - name: Stage shared infrastructure
+      ansible.builtin.include_role:
+        name: quadlet_infra
+        tasks_from: stage.yml
+
+    - name: Stage ntfy
       ansible.builtin.include_role:
         name: quadlet_service
+        tasks_from: stage.yml
       vars:
         quadlet_service_name: ntfy
       tags: ntfy
 
-    - name: Deploy kitchenowl
+    - name: Stage kitchenowl
       ansible.builtin.include_role:
         name: quadlet_service
+        tasks_from: stage.yml
       vars:
         quadlet_service_name: kitchenowl
       tags: kitchenowl
 
-    - name: Deploy mollysocket
+    - name: Stage mollysocket
       ansible.builtin.include_role:
         name: quadlet_service
+        tasks_from: stage.yml
       vars:
         quadlet_service_name: mollysocket
       tags: mollysocket
 
-    - name: Deploy landzunge
+    - name: Stage landzunge
       ansible.builtin.include_role:
         name: quadlet_service
+        tasks_from: stage.yml
       vars:
         quadlet_service_name: landzunge
       tags: landzunge
 
-    - name: Deploy caddy
+    - name: Stage caddy
       ansible.builtin.include_role:
         name: quadlet_service
+        tasks_from: stage.yml
+      vars:
+        quadlet_service_name: caddy
+      tags: caddy
+
+    # -------------------------------------------------------------------------
+    # 3. Single daemon-reload for everything staged above
+    # -------------------------------------------------------------------------
+    - name: Flush handlers to run one daemon-reload
+      ansible.builtin.meta: flush_handlers
+
+    # -------------------------------------------------------------------------
+    # 4. Activate phase — restart on change, ensure started + enabled
+    # -------------------------------------------------------------------------
+    - name: Activate ntfy
+      ansible.builtin.include_role:
+        name: quadlet_service
+        tasks_from: activate.yml
+      vars:
+        quadlet_service_name: ntfy
+      tags: ntfy
+
+    - name: Activate kitchenowl
+      ansible.builtin.include_role:
+        name: quadlet_service
+        tasks_from: activate.yml
+      vars:
+        quadlet_service_name: kitchenowl
+      tags: kitchenowl
+
+    - name: Activate mollysocket
+      ansible.builtin.include_role:
+        name: quadlet_service
+        tasks_from: activate.yml
+      vars:
+        quadlet_service_name: mollysocket
+      tags: mollysocket
+
+    - name: Activate landzunge
+      ansible.builtin.include_role:
+        name: quadlet_service
+        tasks_from: activate.yml
+      vars:
+        quadlet_service_name: landzunge
+      tags: landzunge
+
+    - name: Activate caddy
+      ansible.builtin.include_role:
+        name: quadlet_service
+        tasks_from: activate.yml
       vars:
         quadlet_service_name: caddy
       tags: caddy
