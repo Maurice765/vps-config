@@ -4,7 +4,6 @@
 quadlet_service_quadlet_files:
   - ntfy-cache.volume
   - ntfy.container
-  - ntfy.network
 
 quadlet_service_template_files:
   - server.yml.j2

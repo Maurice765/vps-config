@@ -19,9 +19,15 @@
     - name: Set the XDG runtime path
       ansible.builtin.set_fact:
         apprunner_xdg: "/run/user/{{ ansible_facts['getent_passwd'][podman_user][1] }}"
+    
+    # -------------------------------------------------------------------------
+    # 2. Deploy shared infrastructure
+    # -------------------------------------------------------------------------
+    - name: Deploy shared infrastructure
+      ansible.builtin.import_tasks: tasks/infra.yml
 
     # -------------------------------------------------------------------------
-    # 2. Deploy each service
+    # 3. Deploy each service
     # -------------------------------------------------------------------------
     - name: Deploy ntfy
       ansible.builtin.include_role:

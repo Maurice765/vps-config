@@ -1,0 +1,31 @@
+---
+# =============================================================================
+# tasks/infra.yml
+# Shared infrastructure deployed before any service
+# =============================================================================
+- name: Deploy shared infrastructure
+  become: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"
+  block:
+    # -------------------------------------------------------------------------
+    # 1. Copy shared Quadlet network files -> ~/.config/containers/systemd/
+    # -------------------------------------------------------------------------
+    - name: Copy shared network files
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ podman_user_home }}/.config/containers/systemd/{{ item | basename }}"
+        mode: '0644'
+      loop: "{{ query('ansible.builtin.fileglob', playbook_dir ~ '/infra/files/*') }}"
+      register: infra_files_result
+
+    # -------------------------------------------------------------------------
+    # 2. Reload the systemd user daemon if any infra file changed
+    # -------------------------------------------------------------------------
+    - name: Reload the systemd user daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user
+      when: infra_files_result.changed
