@@ -8,9 +8,6 @@
     XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
     DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"
   block:
-    # -------------------------------------------------------------------------
-    # 1. Load the service manifest (file lists, secrets, values)
-    # -------------------------------------------------------------------------
     - name: Load service-specific variables
       ansible.builtin.include_vars:
         file: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/vars.yml"
@@ -21,9 +18,6 @@
         state: directory
         mode: '0755'
 
-    # -------------------------------------------------------------------------
-    # 2. Podman secrets
-    # -------------------------------------------------------------------------
     - name: Create Podman secrets for the service
       containers.podman.podman_secret:
         name: "{{ item.name }}"
@@ -33,9 +27,8 @@
       loop: "{{ quadlet_service_secrets }}"
       no_log: true
 
-    # -------------------------------------------------------------------------
-    # 3. Copy Quadlet files -> ~/.config/containers/systemd/
-    # -------------------------------------------------------------------------
+    # Only unit-file copies notify the daemon-reload handler; config/template
+    # changes trigger a restart in the activate phase but not a reload.
     - name: Copy Quadlet files
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/files/{{ item }}"
@@ -45,9 +38,6 @@
       register: quadlet_service_quadlet_result
       notify: Reload systemd user daemon
 
-    # -------------------------------------------------------------------------
-    # 4. Copy native systemd units -> ~/.config/systemd/user/
-    # -------------------------------------------------------------------------
     - name: Copy native systemd units
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/files/{{ item }}"
@@ -57,9 +47,6 @@
       register: quadlet_service_systemd_result
       notify: Reload systemd user daemon
 
-    # -------------------------------------------------------------------------
-    # 5. Copy static config files -> ~/services/<name>/
-    # -------------------------------------------------------------------------
     - name: Copy static config files
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/files/{{ item }}"
@@ -68,9 +55,6 @@
       loop: "{{ quadlet_service_config_files }}"
       register: quadlet_service_config_result
 
-    # -------------------------------------------------------------------------
-    # 6. Render templated files -> ~/services/<name>/
-    # -------------------------------------------------------------------------
     - name: Render templated files
       ansible.builtin.template:
         src: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/templates/{{ item }}"
@@ -80,9 +64,6 @@
       loop: "{{ quadlet_service_template_files }}"
       register: quadlet_service_template_result
 
-    # -------------------------------------------------------------------------
-    # 7. Record per-service change flags for the activate phase
-    # -------------------------------------------------------------------------
     - name: "Record change flags for {{ quadlet_service_name }}"
       ansible.builtin.set_fact:
         quadlet_service_changes: >-

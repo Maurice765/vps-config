@@ -1,11 +1,10 @@
-# Vault password file
+# Password file
 .vault_pass
+.become_pass
  
 # Real variable
 host_vars/prod/vars.yml
 host_vars/prod/vault.yml
-.vault_pass
-.become_pass
  
 # Ansible runtime cruft
 *.retry

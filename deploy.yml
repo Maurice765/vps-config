@@ -13,9 +13,6 @@
     - quadlet_infra
 
   tasks:
-    # -------------------------------------------------------------------------
-    # 1. Resolve the apprunner UID for the systemd user session
-    # -------------------------------------------------------------------------
     - name: Look up apprunner UID
       ansible.builtin.getent:
         database: passwd
@@ -25,9 +22,6 @@
       ansible.builtin.set_fact:
         apprunner_xdg: "/run/user/{{ ansible_facts['getent_passwd'][podman_user][1] }}"
 
-    # -------------------------------------------------------------------------
-    # 2. Stage phase — copy files for infra and every service
-    # -------------------------------------------------------------------------
     - name: Stage shared infrastructure
       ansible.builtin.include_role:
         name: quadlet_infra
@@ -73,15 +67,9 @@
         quadlet_service_name: caddy
       tags: caddy
 
-    # -------------------------------------------------------------------------
-    # 3. Single daemon-reload for everything staged above
-    # -------------------------------------------------------------------------
     - name: Flush handlers to run one daemon-reload
       ansible.builtin.meta: flush_handlers
 
-    # -------------------------------------------------------------------------
-    # 4. Activate phase — restart on change, ensure started + enabled
-    # -------------------------------------------------------------------------
     - name: Activate ntfy
       ansible.builtin.include_role:
         name: quadlet_service

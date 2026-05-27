@@ -1,17 +1,11 @@
 ---
-# =============================================================================
-# bootstrap.yml
-# One-time, root-level setup for the VPS
-# =============================================================================
+# One-time, root-level setup for the VPS.
 - name: Bootstrap VPS for rootless Podman
   hosts: quadlet_hosts
   become: true
   gather_facts: true
 
   tasks:
-    # -------------------------------------------------------------------------
-    # 1. Unprivileged system user
-    # -------------------------------------------------------------------------
     - name: Create the unprivileged apprunner system user
       ansible.builtin.user:
         name: "{{ podman_user }}"
@@ -20,9 +14,6 @@
         state: present
       register: apprunner_user
 
-    # -------------------------------------------------------------------------
-    # 2. Enable lingering
-    # -------------------------------------------------------------------------
     - name: Check current linger status for apprunner
       ansible.builtin.command: "loginctl show-user {{ podman_user }} --property=Linger --value"
       register: linger_status
@@ -41,9 +32,6 @@
         enabled: true
       become: true
 
-    # -------------------------------------------------------------------------
-    # 3. Allow rootless containers to bind privileged ports
-    # -------------------------------------------------------------------------
     - name: Allow unprivileged ports starting from port 80
       ansible.posix.sysctl:
         name: net.ipv4.ip_unprivileged_port_start
@@ -53,9 +41,6 @@
         sysctl_set: true
         reload: true
 
-    # -------------------------------------------------------------------------
-    # 4. Base directories owned by apprunner
-    # -------------------------------------------------------------------------
     - name: Create base directories for apprunner
       ansible.builtin.file:
         path: "{{ item }}"
