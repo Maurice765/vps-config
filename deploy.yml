@@ -17,20 +17,27 @@
       ansible.builtin.getent:
         database: passwd
         key: "{{ podman_user }}"
+      tags: always
 
     - name: Set the XDG runtime path
       ansible.builtin.set_fact:
         apprunner_xdg: "/run/user/{{ ansible_facts['getent_passwd'][podman_user][1] }}"
+      tags: always
 
     - name: Stage shared infrastructure
       ansible.builtin.include_role:
         name: quadlet_infra
         tasks_from: stage.yml
+        apply:
+          tags: always
+      tags: always
 
     - name: Stage ntfy
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: stage.yml
+        apply:
+          tags: ntfy
       vars:
         quadlet_service_name: ntfy
       tags: ntfy
@@ -39,6 +46,8 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: stage.yml
+        apply:
+          tags: kitchenowl
       vars:
         quadlet_service_name: kitchenowl
       tags: kitchenowl
@@ -47,6 +56,8 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: stage.yml
+        apply:
+          tags: mollysocket
       vars:
         quadlet_service_name: mollysocket
       tags: mollysocket
@@ -55,6 +66,8 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: stage.yml
+        apply:
+          tags: landzunge
       vars:
         quadlet_service_name: landzunge
       tags: landzunge
@@ -63,17 +76,22 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: stage.yml
+        apply:
+          tags: caddy
       vars:
         quadlet_service_name: caddy
       tags: caddy
 
     - name: Flush handlers to run one daemon-reload
       ansible.builtin.meta: flush_handlers
+      tags: always
 
     - name: Activate ntfy
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: activate.yml
+        apply:
+          tags: ntfy
       vars:
         quadlet_service_name: ntfy
       tags: ntfy
@@ -82,6 +100,8 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: activate.yml
+        apply:
+          tags: kitchenowl
       vars:
         quadlet_service_name: kitchenowl
       tags: kitchenowl
@@ -90,6 +110,8 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: activate.yml
+        apply:
+          tags: mollysocket
       vars:
         quadlet_service_name: mollysocket
       tags: mollysocket
@@ -98,6 +120,8 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: activate.yml
+        apply:
+          tags: landzunge
       vars:
         quadlet_service_name: landzunge
       tags: landzunge
@@ -106,6 +130,8 @@
       ansible.builtin.include_role:
         name: quadlet_service
         tasks_from: activate.yml
+        apply:
+          tags: caddy
       vars:
         quadlet_service_name: caddy
       tags: caddy
