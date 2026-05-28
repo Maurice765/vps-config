@@ -4,7 +4,7 @@ AssertPathIsDirectory=%h/services/kitchenowl
 AssertPathExists=%h/services/kitchenowl/.env
 
 [Service]
-MemoryMax=1G
+MemoryMax=2G
 CPUQuota=100%
 
 [Container]
