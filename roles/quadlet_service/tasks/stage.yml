@@ -37,7 +37,7 @@
     # Only unit-file copies notify the daemon-reload handler; config/template
     # changes trigger a restart in the activate phase but not a reload.
     - name: Copy Quadlet files
-      ansible.builtin.copy:
+      ansible.builtin.template:
         src: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/files/{{ item }}"
         dest: "{{ podman_user_home }}/.config/containers/systemd/{{ item }}"
         mode: '0644'

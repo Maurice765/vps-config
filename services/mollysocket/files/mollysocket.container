@@ -12,6 +12,7 @@ ContainerName=mollysocket
 Image=ghcr.io/mollyim/mollysocket:1.7.1
 Exec=server
 WorkingDir=/data
+AddHost={{ ntfy_domain }}:host-gateway
 
 # Network
 Network=mollysocket.network
