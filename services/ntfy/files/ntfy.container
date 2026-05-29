@@ -9,7 +9,7 @@ CPUQuota=50%
 
 [Container]
 ContainerName=ntfy
-Image=docker.io/binwiederhier/ntfy:v2.22
+Image=docker.io/binwiederhier/ntfy:v2.23
 Exec=serve
 RunInit=true
 
