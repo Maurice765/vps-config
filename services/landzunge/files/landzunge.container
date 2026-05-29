@@ -9,7 +9,7 @@ CPUQuota=50%
 
 [Container]
 ContainerName=landzunge-backend
-Image=ghcr.io/finnhoedt/landzunge-backend:1.1
+Image=ghcr.io/finnhoedt/landzunge-backend:1.2
 
 # Network
 Network=landzunge.network
