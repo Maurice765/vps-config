@@ -1,0 +1,113 @@
+name: Trivy daily image scan
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # daily 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to ghcr.io (for Trivy DB pulls)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
+        with:
+          version: v0.70.0
+
+      - name: Scan images and build summary
+        id: scan
+        run: |
+          set -uo pipefail
+
+          images=$(grep -rhoP '(?<=^Image=).*' services/*/files/*.container 2>/dev/null | sort -u || true)
+          if [ -z "$images" ]; then
+            echo "No images discovered — check services/*/files/*.container" >&2
+            exit 1
+          fi
+          echo "Discovered images:"
+          echo "$images"
+
+          summary=""
+          total=0
+
+          while IFS= read -r image; do
+            [ -z "$image" ] && continue
+            echo "::group::Scanning $image"
+            report=$(mktemp)
+            if ! trivy image \
+                  --quiet \
+                  --scanners vuln \
+                  --severity CRITICAL,HIGH \
+                  --format json \
+                  --exit-code 0 \
+                  --output "$report" \
+                  "$image"; then
+              echo "scan failed for $image"
+              summary="${summary}${image} — scan failed"$'\n'
+              rm -f "$report"
+              echo "::endgroup::"
+              continue
+            fi
+
+            counts=$(jq -r '
+              [.Results[]?.Vulnerabilities[]? | .Severity] as $sev
+              | "\(($sev | map(select(. == "CRITICAL")) | length)) \(($sev | map(select(. == "HIGH")) | length))"
+            ' "$report")
+            crit=$(echo "$counts" | cut -d" " -f1)
+            high=$(echo "$counts" | cut -d" " -f2)
+            crit=${crit:-0}
+            high=${high:-0}
+            rm -f "$report"
+
+            echo "$image: $crit CRITICAL, $high HIGH"
+            if [ "$crit" -gt 0 ] || [ "$high" -gt 0 ]; then
+              summary="${summary}${image} — ${crit} CRITICAL, ${high} HIGH"$'\n'
+              total=$((total + crit + high))
+            fi
+            echo "::endgroup::"
+          done <<< "$images"
+
+          echo "Total CRITICAL+HIGH findings: $total"
+
+          {
+            echo "total=$total"
+            echo "summary<<SUMMARY_EOF"
+            printf '%s' "$summary"
+            echo "SUMMARY_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Notify via ntfy
+        if: steps.scan.outputs.total != '0'
+        env:
+          NTFY_URL: ${{ secrets.NTFY_URL }}
+          SUMMARY: ${{ steps.scan.outputs.summary }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NTFY_URL:-}" ]; then
+            echo "NTFY_URL secret is not set" >&2
+            exit 1
+          fi
+          curl -sf \
+            -H "Title: Trivy: vulnerabilities in VPS images" \
+            -H "Priority: high" \
+            -H "Tags: warning,shield" \
+            -d "$SUMMARY" \
+            "$NTFY_URL"
+
+      - name: Report clean result
+        if: steps.scan.outputs.total == '0'
+        run: echo "No CRITICAL/HIGH vulnerabilities found — no notification sent."
