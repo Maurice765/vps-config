@@ -5,8 +5,3 @@
   ansible.builtin.systemd:
     daemon_reload: true
     scope: user
-  become: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"

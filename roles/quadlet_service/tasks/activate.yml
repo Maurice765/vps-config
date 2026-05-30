@@ -11,11 +11,6 @@
     file: "{{ playbook_dir }}/services/{{ quadlet_service_name }}/vars.yml"
 
 - name: "Activate service: {{ quadlet_service_name }}"
-  become: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"
   when: quadlet_service_enabled
   block:
     - name: Restart service units after a change

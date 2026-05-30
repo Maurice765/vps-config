@@ -4,6 +4,7 @@
 # ensure started + enabled).
 - name: Deploy Quadlet services
   hosts: quadlet_hosts
+  remote_user: "{{ podman_user }}"
   gather_facts: true
 
   # quadlet_infra is pre-loaded here so its Reload-systemd-user-daemon
@@ -13,17 +14,6 @@
     - quadlet_infra
 
   tasks:
-    - name: Look up apprunner UID
-      ansible.builtin.getent:
-        database: passwd
-        key: "{{ podman_user }}"
-      tags: always
-
-    - name: Set the XDG runtime path
-      ansible.builtin.set_fact:
-        apprunner_xdg: "/run/user/{{ ansible_facts['getent_passwd'][podman_user][1] }}"
-      tags: always
-
     - name: Stage shared infrastructure
       ansible.builtin.include_role:
         name: quadlet_infra
