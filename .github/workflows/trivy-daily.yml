@@ -88,10 +88,15 @@ jobs:
             echo "$image: $crit CRITICAL, $high HIGH"
 
             if [ "$crit" -gt 0 ] || [ "$high" -gt 0 ]; then
+              # Sort CRITICAL before HIGH (alphabetical works: C < H), then by CVE
+              # ID, and include the fixing version (always present under
+              # --ignore-unfixed) so each line is immediately actionable.
               cve_details=$(jq -r '
-                .Results[]?.Vulnerabilities[]?
-                | "  • \(.VulnerabilityID) (\(.Severity) in \(.PkgName))"
-              ' "$report" | sort -u)
+                [.Results[]?.Vulnerabilities[]?]
+                | unique_by(.VulnerabilityID, .PkgName)
+                | sort_by(.Severity, .VulnerabilityID)[]
+                | "  • \(.VulnerabilityID) (\(.Severity) in \(.PkgName) → fix: \(.FixedVersion // "?"))"
+              ' "$report")
 
               # Full, uncapped list goes to the artifact.
               {
@@ -119,6 +124,15 @@ jobs:
           done <<< "$images"
 
           echo "Total CRITICAL+HIGH findings: $total"
+
+          # Guard ntfy's ~4096-byte body limit: curl -sf would hard-fail on the
+          # resulting HTTP 413. Truncate the notification body (the full,
+          # untruncated data is preserved in the uploaded artifact). iconv -c
+          # drops any partial multibyte char left at the byte cut.
+          max_summary_bytes=3500
+          if [ "$(printf '%s' "$summary" | wc -c)" -gt "$max_summary_bytes" ]; then
+            summary="$(printf '%s' "$summary" | head -c "$max_summary_bytes" | iconv -f utf-8 -t utf-8 -c)"$'\n'"… (truncated, see workflow artifact)"$'\n'
+          fi
 
           {
             echo "total=$total"
