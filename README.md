@@ -7,8 +7,12 @@ codebase.
 
 - **`bootstrap.yml`** — one-time, root-level setup: creates the `apprunner`
   user, enables lingering, allows privileged ports, creates base directories.
-- **`deploy.yml`** — day-to-day deployment: loops over every service and applies
-  the generic `quadlet_service` role.
+  Run as an admin/sudo user (needs `--ask-become-pass`).
+- **`deploy.yml`** — day-to-day deployment: connects directly as `apprunner`
+  (set via `remote_user`) and runs entirely as that unprivileged user, with no
+  `sudo`/privilege escalation. Loops over every service and applies the generic
+  `quadlet_service` role. Requires `apprunner`'s SSH key to be authorized on the
+  host.
 - **`roles/quadlet_infra/`** — shared Quadlet foundation. Stages cross-service
   resources (shared podman networks) and owns the daemon-reload handler that
   every notifier fires into. Pre-loaded via `deploy.yml`'s `roles:` keyword
@@ -94,22 +98,25 @@ ansible-playbook bootstrap.yml --limit test --ask-vault-pass --ask-pass --ask-be
 ansible-playbook bootstrap.yml --limit prod --ask-vault-pass --ask-become-pass
 ```
 
-Deploy all services to a host:
+Deploy all services to a host (connects as `apprunner`, no `--ask-become-pass`):
 
 ```sh
-ansible-playbook deploy.yml --limit test --ask-vault-pass --ask-pass --ask-become-pass
-ansible-playbook deploy.yml --limit prod --ask-vault-pass --ask-become-pass
+ansible-playbook deploy.yml --limit test --ask-vault-pass
+ansible-playbook deploy.yml --limit prod --ask-vault-pass
 ```
 
 Deploy a single service via its tag:
 
 ```sh
-ansible-playbook deploy.yml --limit prod --tags caddy --ask-vault-pass --ask-become-pass
+ansible-playbook deploy.yml --limit prod --tags caddy --ask-vault-pass
 ```
 
 ## Notes
 
 - `inventory.ini` holds only SSH config aliases — no IPs or usernames.
+- `bootstrap.yml` connects as your admin/sudo user; `deploy.yml` connects as
+  `apprunner` directly. Authorize `apprunner`'s SSH key on each host before
+  deploying.
 - `host_vars/test/` is committed. `host_vars/prod/vars.yml` and `host_vars/prod/vault.yml`
   are gitignored; only their `.example` templates are committed.
 - Quadlet files (`.container`, `.volume`, `.network`) are static. Environment

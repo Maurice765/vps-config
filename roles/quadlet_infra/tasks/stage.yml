@@ -1,11 +1,6 @@
 ---
 # Stage shared Quadlet infrastructure (cross-service networks).
 - name: Stage shared Quadlet infrastructure
-  become: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "{{ apprunner_xdg }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ apprunner_xdg }}/bus"
   block:
     - name: Copy shared network files
       ansible.builtin.copy:
