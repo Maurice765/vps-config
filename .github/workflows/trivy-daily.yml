@@ -93,8 +93,8 @@ jobs:
               # --ignore-unfixed) so each line is immediately actionable.
               cve_details=$(jq -r '
                 [.Results[]?.Vulnerabilities[]?]
-                | unique_by(.VulnerabilityID, .PkgName)
-                | sort_by(.Severity, .VulnerabilityID)[]
+                | unique_by([.VulnerabilityID, .PkgName])
+                | sort_by([.Severity, .VulnerabilityID])[]
                 | "  • \(.VulnerabilityID) (\(.Severity) in \(.PkgName) → fix: \(.FixedVersion // "?"))"
               ' "$report")
 
