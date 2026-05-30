@@ -43,21 +43,34 @@ jobs:
 
           summary=""
           total=0
+          max_cve_lines=15
+          full_report="$GITHUB_WORKSPACE/trivy-full-report.txt"
+          {
+            echo "Trivy daily image scan — $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "Filters: severity CRITICAL,HIGH; fixed only (--ignore-unfixed)"
+            echo
+          } > "$full_report"
 
           while IFS= read -r image; do
             [ -z "$image" ] && continue
             echo "::group::Scanning $image"
             report=$(mktemp)
+
             if ! trivy image \
                   --quiet \
                   --scanners vuln \
                   --severity CRITICAL,HIGH \
+                  --ignore-unfixed \
                   --format json \
                   --exit-code 0 \
                   --output "$report" \
                   "$image"; then
               echo "scan failed for $image"
               summary="${summary}${image} — scan failed"$'\n'
+              {
+                echo "=== ${image}: scan failed ==="
+                echo
+              } >> "$full_report"
               rm -f "$report"
               echo "::endgroup::"
               continue
@@ -71,13 +84,37 @@ jobs:
             high=$(echo "$counts" | cut -d" " -f2)
             crit=${crit:-0}
             high=${high:-0}
-            rm -f "$report"
 
             echo "$image: $crit CRITICAL, $high HIGH"
+
             if [ "$crit" -gt 0 ] || [ "$high" -gt 0 ]; then
-              summary="${summary}${image} — ${crit} CRITICAL, ${high} HIGH"$'\n'
+              cve_details=$(jq -r '
+                .Results[]?.Vulnerabilities[]?
+                | "  • \(.VulnerabilityID) (\(.Severity) in \(.PkgName))"
+              ' "$report" | sort -u)
+
+              # Full, uncapped list goes to the artifact.
+              {
+                echo "=== ${image}: ${crit} CRITICAL, ${high} HIGH ==="
+                printf '%s\n\n' "$cve_details"
+              } >> "$full_report"
+
+              # Capped list goes to the (size-limited) ntfy notification body.
+              cve_lines=$(printf '%s\n' "$cve_details" | wc -l)
+              capped=$(printf '%s\n' "$cve_details" | head -n "$max_cve_lines")
+              if [ "$cve_lines" -gt "$max_cve_lines" ]; then
+                capped="${capped}"$'\n'"  … and $((cve_lines - max_cve_lines)) more (see workflow artifact)"
+              fi
+              summary="${summary}📦 ${image}: ${crit} CRIT, ${high} HIGH"$'\n'"${capped}"$'\n\n'
               total=$((total + crit + high))
+            else
+              {
+                echo "=== ${image}: clean ==="
+                echo
+              } >> "$full_report"
             fi
+
+            rm -f "$report"
             echo "::endgroup::"
           done <<< "$images"
 
@@ -89,6 +126,15 @@ jobs:
             printf '%s' "$summary"
             echo "SUMMARY_EOF"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Upload full Trivy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-full-report
+          path: trivy-full-report.txt
+          retention-days: 30
+          if-no-files-found: ignore
 
       - name: Notify via ntfy
         if: steps.scan.outputs.total != '0'
